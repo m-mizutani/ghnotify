@@ -10,6 +10,8 @@ Setup incoming webhook according to https://api.slack.com/messaging/webhooks and
 
 ### 2) Creating Rego policy
 
+`ghnotify` evaluates received GitHub event one by one. If `notify` variable exists in evaluation results, `ghnotify` notifies a message to Slack according to the results.
+
 Policy rules are following.
 
 **Input**: What data will be provided
@@ -20,7 +22,7 @@ Policy rules are following.
 - `notify`: Set of notification messages
     - `notify[_].channel`: Destination channel of Slack. If empty, notification will be sent to default channel of the incoming webhook.
     - `notify[_].text`: Custom message of slack notification
-    - `notify[_].header`: Custom message header (like title)
+    - `notify[_].body`: Custom message body
     - `notify[_].color`: Message bar color
     - `notify[_].fields`: Set of custom message fields.
         - `notify[_].fields[_].name`: Field name
@@ -38,9 +40,15 @@ notify[msg] {
     msg := {
         "channel": "notify-mizutani",
         "text": "Hello, mizutani",
+        "body": input.event.comment.body,
     }
 }
 ```
+
+Then, you shall get a message like following.
+
+![](https://user-images.githubusercontent.com/605953/155864886-c9c8ccbb-809c-44df-8925-fe69a0d820f4.png)
+
 
 #### Example 2) Notification of workflow (actions) failed
 
@@ -56,10 +64,6 @@ notify[msg] {
         "channel": "notify-failure",
         "text": "workflow failed",
         "color": "#E01E5A", # red
-        "fields": [
-            "name": "Repository",
-            "value": input.event.full_name,
-        ],
     }
 }
 ```
@@ -73,18 +77,16 @@ notify[msg] {
     input.name == "pull_request"
     input.event.action == "labeled"
     input.event.label.name == "breaking-change"
+    labels := { label | input.event.pull_request.labels[_].name }
 
     msg := {
         "channel": "notify-mizutani",
         "text": "breaking change assigned",
         "fields": [
-            "name": "Repository",
-            "value": input.event.full_name,
-        ],
-        "fields": [
-            "name": "PR",
-            "value": input.event.pull_request.title,
-            "url": input.event.pull_request.html_url,
+            {
+                "name": "All labels",
+                "value": concat(", ", labels),
+            },
         ],
     }
 }

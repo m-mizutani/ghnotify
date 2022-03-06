@@ -55,3 +55,8 @@ jobs:
         run: docker tag ${{ env.GITHUB_IMAGE_NAME }} "${{ env.GITHUB_IMAGE_REPO }}:${{ steps.tag.outputs.tag }}"
       - name: Push Docker image (tag name)
         run: docker push "${{ env.GITHUB_IMAGE_REPO }}:${{ steps.tag.outputs.tag }}"
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "Published built ghnotify image ${{ github.sha }}"

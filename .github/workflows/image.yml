@@ -32,7 +32,12 @@ jobs:
         run: docker tag ${{ env.GITHUB_IMAGE_LATEST }} ${{ env.GITHUB_IMAGE_NAME }}
       - name: Push image
         run: docker push ${{ env.GITHUB_IMAGE_NAME }}
-      - uses: actions/checkout@v2
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "Published built ghnotify image: ${{ env.GITHUB_IMAGE_NAME }}"
+
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
@@ -59,4 +64,4 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: "Published built ghnotify image ${{ github.sha }}"
+          SLACK_MESSAGE: "Published built ghnotify image: ${{ steps.tag.outputs.tag }}"

@@ -104,7 +104,7 @@ notify[msg] {
 
 ## Run
 
-### Case 1: As GitHub Actions
+### Use Case 1: As GitHub Actions
 
 - Pros: Easy to install
 - Cons: GitHub Actions can receive events from only the repository
@@ -131,10 +131,10 @@ jobs:
         run: echo '${{ toJSON(github.event) }}' > /tmp/event.json
       - uses: docker://ghcr.io/m-mizutani/ghnotify:latest
         with:
-          args: "-f /tmp/event.json -t ${{ github.event_name }} --local-policy ./policy"
+          args: "emit -f /tmp/event.json -t ${{ github.event_name }} --local-policy ./policy"
 ```
 
-### Case 2: As GitHub App server
+### Use Case 2: As GitHub App server
 
 - Pros: Easy to install
 - Cons: GitHub Actions can receive event on each repository, can not watch organization wide
@@ -144,6 +144,8 @@ jobs:
 Deploy `ghnotify` to your environment and prepare URL that can be accessed from public internet. I recommend [Cloud Run](https://cloud.google.com/run) of Google Cloud in the use case.
 
 When deploying `ghnotify`, I recommend to generate and use *Webhook secret* value. Please prepare random token and provide it to `--webhook-secret`.
+
+Callback endpoint will be `http://{hostname}:4080/webhook/github`. You can change port number by `--addr` option.
 
 #### Create a new GitHub App
 
@@ -166,8 +168,8 @@ When deploying `ghnotify`, I recommend to generate and use *Webhook secret* valu
     - `--local-package`: Package name of policy file
     - `--remote-url`: URL of OPA server
     - `--remote-header`: HTTP header to query OPA server
-- Notification
-    - `--slack-api-token`: API token retrieved in Step 1
+- Notification (either one of following is required)
+    - `--slack-api-token`: API token retrieved in Step 1 (Recommended)
     - `--slack-webhook`: Incoming webhook URL of Slack
 
 ## License

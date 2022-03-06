@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/go-chi/chi v1.5.4
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v43 v43.0.0
 	github.com/m-mizutani/goerr v0.1.4
@@ -20,7 +21,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect

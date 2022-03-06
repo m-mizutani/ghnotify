@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
-	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v43 v43.0.0
 	github.com/m-mizutani/goerr v0.1.4
 	github.com/m-mizutani/opac v0.1.0

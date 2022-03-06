@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v43/github"
 	"github.com/m-mizutani/ghnotify/pkg/domain/model"
 	"github.com/m-mizutani/ghnotify/pkg/domain/types"
 	"github.com/m-mizutani/goerr"

@@ -9,7 +9,7 @@ import (
 
 type Context struct {
 	context.Context
-	logger *zlog.LogEntity
+	logger *zlog.Logger
 }
 
 type ContextOption func(c *Context)
@@ -17,7 +17,7 @@ type ContextOption func(c *Context)
 func NewContext(options ...ContextOption) *Context {
 	ctx := &Context{
 		Context: context.Background(),
-		logger:  utils.Logger.Log(),
+		logger:  utils.Logger,
 	}
 
 	for _, opt := range options {
@@ -32,12 +32,12 @@ func WithCtx(ctx context.Context) ContextOption {
 	}
 }
 
-func WithLogger(logger *zlog.LogEntity) ContextOption {
+func WithLogger(logger *zlog.Logger) ContextOption {
 	return func(c *Context) {
 		c.logger = logger
 	}
 }
 
-func (x *Context) Log() *zlog.LogEntity {
+func (x *Context) Log() *zlog.Logger {
 	return x.logger
 }

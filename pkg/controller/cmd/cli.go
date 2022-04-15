@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net/http"
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -14,6 +15,7 @@ import (
 	"github.com/m-mizutani/opac"
 	"github.com/m-mizutani/zlog"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/api/idtoken"
 )
 
 type globalConfig struct {
@@ -27,6 +29,19 @@ type globalConfig struct {
 	RemoteHeaders []string
 
 	remoteHeaders cli.StringSlice
+
+	remoteIDTokenClient bool
+}
+
+type idTokenClient struct{}
+
+func (x *idTokenClient) Do(req *http.Request) (*http.Response, error) {
+	client, err := idtoken.NewClient(req.Context(), req.URL.String())
+	if err != nil {
+		return nil, goerr.Wrap(err, "failed idtoken.NewClient for GCP IAP").With("req", req)
+	}
+
+	return client.Do(req)
 }
 
 func (x *globalConfig) newUsecase() (*usecase.Usecase, error) {
@@ -68,6 +83,11 @@ func (x *globalConfig) newUsecase() (*usecase.Usecase, error) {
 				strings.TrimSpace(parts[1]),
 			))
 		}
+
+		if x.remoteIDTokenClient {
+			options = append(options, opac.WithHTTPClient(&idTokenClient{}))
+		}
+
 		client, err := opac.NewRemote(x.RemoteURL, options...)
 		if err != nil {
 			return nil, goerr.Wrap(err)
@@ -119,6 +139,12 @@ func Run(argv []string) error {
 				Usage:       "HTTP Header (format: `HeaderName: HeaderValue`)",
 				EnvVars:     []string{"GHNOTIFY_REMOTE_HEADER"},
 				Destination: &cfg.remoteHeaders,
+			},
+			&cli.BoolFlag{
+				Name:        "remote-idtoken-client",
+				Usage:       "Enable IDToken client",
+				EnvVars:     []string{"GHNOTIFY_REMOTE_IDTOKEN_CLIENT"},
+				Destination: &cfg.remoteIDTokenClient,
 			},
 
 			&cli.StringFlag{

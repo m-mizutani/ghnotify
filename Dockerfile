@@ -1,4 +1,4 @@
-FROM golang:1.17 AS build-go
+FROM golang:1.18 AS build-go
 COPY . /src
 WORKDIR /src
 RUN go build -o ghnotify .

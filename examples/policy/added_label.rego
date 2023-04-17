@@ -1,7 +1,7 @@
 package github.notify
 
 notify[msg] {
-    input.name == "pull_requests"
+    input.name == "pull_request"
     input.event.action == "labeled"
     input.event.label.name == "breaking-change"
 

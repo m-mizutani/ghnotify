@@ -15,6 +15,7 @@ import (
 	"github.com/m-mizutani/ghnotify/pkg/usecase"
 	"github.com/m-mizutani/ghnotify/pkg/utils"
 	"github.com/m-mizutani/goerr"
+	"golang.org/x/exp/slog"
 )
 
 type Server struct {
@@ -38,6 +39,7 @@ func New(uc *usecase.Usecase) *Server {
 }
 
 func (x *Server) Listen(addr string) error {
+	utils.Logger.Info("start listening", slog.String("addr", addr))
 	server := &http.Server{Addr: addr, Handler: x.mux}
 
 	errCh := make(chan error, 1)
@@ -79,7 +81,7 @@ func handleError(w http.ResponseWriter, err error) {
 
 	w.WriteHeader(code)
 	if _, err := w.Write([]byte(err.Error())); err != nil {
-		utils.Logger.Err(err).Error("fail to write error response")
+		utils.Logger.Error("fail to write error response", utils.ErrLog(err))
 	}
 }
 
@@ -100,7 +102,7 @@ func serveGitHubWebhook(uc *usecase.Usecase) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("ok")); err != nil {
-			utils.Logger.Err(err).Error("fail to write response")
+			utils.Logger.Error("fail to write response", utils.ErrLog(err))
 		}
 	}
 }

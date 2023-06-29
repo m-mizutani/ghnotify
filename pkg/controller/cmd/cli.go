@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/m-mizutani/ghnotify/pkg/controller/cmd/option"
 	"github.com/m-mizutani/ghnotify/pkg/domain/model"
 	"github.com/m-mizutani/ghnotify/pkg/domain/types"
 	"github.com/m-mizutani/ghnotify/pkg/infra"
@@ -13,15 +13,14 @@ import (
 	"github.com/m-mizutani/ghnotify/pkg/utils"
 	"github.com/m-mizutani/goerr"
 	"github.com/m-mizutani/opac"
-	"github.com/m-mizutani/zlog"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/api/idtoken"
 )
 
 type globalConfig struct {
 	SlackWebhookURL     string
-	SlackAPIToken       string `zlog:"secret"`
-	GitHubWebhookSecret string `zlog:"secret"`
+	SlackAPIToken       string `masq:"secret"`
+	GitHubWebhookSecret string `masq:"secret"`
 
 	LocalPolicy   string
 	LocalPackage  string
@@ -108,7 +107,9 @@ func Run(argv []string) error {
 	var (
 		cfg globalConfig
 
-		logLevel string
+		logLevel  option.LogLevel
+		logFormat option.LogFormat
+		logOutput option.LogOutput
 	)
 
 	app := &cli.App{
@@ -160,13 +161,29 @@ func Run(argv []string) error {
 				Destination: &cfg.SlackAPIToken,
 			},
 
-			&cli.StringFlag{
+			&cli.GenericFlag{
 				Name:        "log-level",
+				Category:    "logging",
 				Aliases:     []string{"l"},
-				Usage:       "Log level [trace|debug|info|warn|error]",
+				Usage:       "Log level [debug|info|warn|error]",
 				EnvVars:     []string{"GHNOTIFY_LOG_LEVEL"},
 				Destination: &logLevel,
-				Value:       "info",
+			},
+			&cli.GenericFlag{
+				Name:        "log-format",
+				Category:    "logging",
+				Aliases:     []string{"f"},
+				Usage:       "Log format [text|json]",
+				EnvVars:     []string{"GHNOTIFY_LOG_FORMAT"},
+				Destination: &logFormat,
+			},
+			&cli.GenericFlag{
+				Name:        "log-output",
+				Category:    "logging",
+				Aliases:     []string{"o"},
+				Usage:       "Log output [stdout|stderr]",
+				EnvVars:     []string{"GHNOTIFY_LOG_OUTPUT"},
+				Destination: &logOutput,
 			},
 		},
 		Commands: []*cli.Command{
@@ -176,14 +193,7 @@ func Run(argv []string) error {
 		Before: func(ctx *cli.Context) error {
 			cfg.RemoteHeaders = cfg.remoteHeaders.Value()
 
-			if err := validation.Validate(logLevel,
-				validation.Required,
-				validation.In("trace", "debug", "info", "warn", "error"),
-			); err != nil {
-				return goerr.Wrap(err)
-			}
-
-			utils.RenewLogger(zlog.WithLogLevel(logLevel))
+			utils.RenewLogger(logOutput.Writer(), logLevel, logFormat)
 
 			utils.Logger.With("config", cfg).Debug("Starting...")
 
@@ -193,7 +203,6 @@ func Run(argv []string) error {
 
 	if err := app.Run(argv); err != nil {
 		utils.Logger.Error(err.Error())
-		utils.Logger.Err(err).Debug("error detail")
 		return err
 	}
 	return nil

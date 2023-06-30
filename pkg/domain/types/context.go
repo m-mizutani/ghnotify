@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/m-mizutani/ghnotify/pkg/utils"
-	"github.com/m-mizutani/zlog"
+	"golang.org/x/exp/slog"
 )
 
 type Context struct {
 	context.Context
-	logger *zlog.Logger
+	logger *slog.Logger
 }
 
 type ContextOption func(c *Context)
@@ -32,12 +32,12 @@ func WithCtx(ctx context.Context) ContextOption {
 	}
 }
 
-func WithLogger(logger *zlog.Logger) ContextOption {
+func WithLogger(logger *slog.Logger) ContextOption {
 	return func(c *Context) {
 		c.logger = logger
 	}
 }
 
-func (x *Context) Log() *zlog.Logger {
+func (x *Context) Log() *slog.Logger {
 	return x.logger
 }

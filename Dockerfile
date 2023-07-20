@@ -1,4 +1,4 @@
-FROM golang:1.20 AS build-go
+FROM golang:1.20-bullseye AS build-go
 COPY . /src
 WORKDIR /src
 RUN go build -o ghnotify .

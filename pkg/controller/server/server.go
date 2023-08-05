@@ -32,6 +32,8 @@ func New(uc *usecase.Usecase) *Server {
 
 	r.Post("/webhook/github", serveGitHubWebhook(uc))
 
+	r.Get("/health", handleHealthCheckRequest())
+
 	return &Server{
 		uc:  uc,
 		mux: r,

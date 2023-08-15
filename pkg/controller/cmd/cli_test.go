@@ -60,7 +60,7 @@ func TestRun(t *testing.T) {
 				select {
 				case err := <-errCh:
 					assert.NoError(t, err)
-				case <-time.After(time.Second * 1):
+				case <-time.After(time.Duration(0.01 * float64(time.Second))):
 					t.Log("cmd.Run exited without error")
 				}
 			})

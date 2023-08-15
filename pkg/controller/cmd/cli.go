@@ -174,7 +174,7 @@ func Run(argv []string) error {
 				Name:        "log-format",
 				Category:    "logging",
 				Aliases:     []string{"f"},
-				Usage:       "Log format [text|json]",
+				Usage:       "Log format [console|json]",
 				EnvVars:     []string{"GHNOTIFY_LOG_FORMAT"},
 				Destination: &logFormat,
 				Value:       &logFormat,

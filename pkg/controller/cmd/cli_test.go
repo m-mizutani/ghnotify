@@ -24,7 +24,7 @@ func TestRun(t *testing.T) {
 			"error": EnvTest{"4084", "error"},
 		},
 		"GHNOTIFY_LOG_FORMAT": {
-			"text": EnvTest{"4085", "text"},
+			"text": EnvTest{"4085", "console"},
 			"json": EnvTest{"4086", "json"},
 		},
 		"GHNOTIFY_LOG_OUTPUT": {

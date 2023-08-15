@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -10,60 +11,59 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	tests := []struct {
-		name     string
-		envKey   string
-		envValue string
-		port     string
-	}{
-		{
-			name:     "configure using GHNOTIFY_LOG_LEVEL",
-			envKey:   "GHNOTIFY_LOG_LEVEL",
-			envValue: "debug",
-			port:     "4080",
+	type EnvTest struct {
+		port  string
+		value string
+	}
+
+	testCases := map[string]map[string]EnvTest{
+		"GHNOTIFY_LOG_LEVEL": {
+			"debug": EnvTest{"4081", "debug"},
+			"info":  EnvTest{"4082", "info"},
+			"warn":  EnvTest{"4083", "warn"},
+			"error": EnvTest{"4084", "error"},
 		},
-		{
-			name:     "configure using GHNOTIFY_LOG_FORMAT",
-			envKey:   "GHNOTIFY_LOG_FORMAT",
-			envValue: "json",
-			port:     "4081",
+		"GHNOTIFY_LOG_FORMAT": {
+			"text": EnvTest{"4085", "text"},
+			"json": EnvTest{"4086", "json"},
 		},
-		{
-			name:     "configure using GHNOTIFY_LOG_OUTPUT",
-			envKey:   "GHNOTIFY_LOG_OUTPUT",
-			envValue: "stdout",
-			port:     "4082",
+		"GHNOTIFY_LOG_OUTPUT": {
+			"stdout": EnvTest{"4087", "stdout"},
+			"stderr": EnvTest{"4088", "stderr"},
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv(tt.envKey, tt.envValue)
-			defer os.Unsetenv(tt.envKey)
+	for envKey, variations := range testCases {
+		for variationName, variation := range variations {
+			testName := fmt.Sprintf("%s as %s", envKey, variationName)
+			t.Run(testName, func(t *testing.T) {
+				os.Setenv(envKey, variation.value)
+				defer os.Unsetenv(envKey)
 
-			errCh := make(chan error)
+				errCh := make(chan error)
 
-			go func() {
-				argv := []string{
-					"ghnotify",
-					"--slack-api-token",
-					"dummy",
-					"--remote-url",
-					"localhost:1234",
-					"serve",
-					"--addr",
-					"0.0.0.0:" + tt.port,
+				go func() {
+					argv := []string{
+						"ghnotify",
+						"--slack-api-token",
+						"dummy",
+						"--remote-url",
+						"localhost:1234",
+						"serve",
+						"--addr",
+						"0.0.0.0:" + variation.port,
+					}
+					err := cmd.Run(argv)
+					errCh <- err
+				}()
+
+				select {
+				case err := <-errCh:
+					assert.NoError(t, err)
+				case <-time.After(time.Second * 1):
+					t.Log("cmd.Run exited without error")
 				}
-				err := cmd.Run(argv)
-				errCh <- err
-			}()
-
-			select {
-			case err := <-errCh:
-				assert.NoError(t, err)
-			case <-time.After(time.Second * 1):
-				t.Log("cmd.Run exited without error")
-			}
-		})
+			})
+		}
 	}
 }

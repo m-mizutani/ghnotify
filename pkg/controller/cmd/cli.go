@@ -168,6 +168,7 @@ func Run(argv []string) error {
 				Usage:       "Log level [debug|info|warn|error]",
 				EnvVars:     []string{"GHNOTIFY_LOG_LEVEL"},
 				Destination: &logLevel,
+				Value:       &logLevel,
 			},
 			&cli.GenericFlag{
 				Name:        "log-format",

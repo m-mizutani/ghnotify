@@ -177,6 +177,7 @@ func Run(argv []string) error {
 				Usage:       "Log format [text|json]",
 				EnvVars:     []string{"GHNOTIFY_LOG_FORMAT"},
 				Destination: &logFormat,
+				Value:       &logFormat,
 			},
 			&cli.GenericFlag{
 				Name:        "log-output",
@@ -185,6 +186,7 @@ func Run(argv []string) error {
 				Usage:       "Log output [stdout|stderr]",
 				EnvVars:     []string{"GHNOTIFY_LOG_OUTPUT"},
 				Destination: &logOutput,
+				Value:       &logOutput,
 			},
 		},
 		Commands: []*cli.Command{

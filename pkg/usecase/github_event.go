@@ -45,10 +45,21 @@ func (x *Usecase) HandleGitHubEvent(ctx *types.Context, eventType string, body [
 
 func toBlock(field *model.NotifyField) *slack.TextBlockObject {
 	text := fmt.Sprintf("*%s*: ", field.Name)
+
+	var valueStr string
+	switch v := field.Value.(type) {
+	case string:
+		valueStr = v
+	case bool:
+		valueStr = fmt.Sprintf("%v", v)
+	default:
+		valueStr = "unknown"
+	}
+
 	if field.URL != "" {
-		text += fmt.Sprintf("<%s|%s>", field.URL, field.Value)
+		text += fmt.Sprintf("<%s|%s>", field.URL, valueStr)
 	} else {
-		text += field.Value
+		text += valueStr
 	}
 	return slack.NewTextBlockObject(slack.MarkdownType, text, false, false)
 }

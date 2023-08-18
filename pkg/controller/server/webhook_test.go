@@ -62,6 +62,10 @@ func TestWebhook(t *testing.T) {
 							Value: "blue",
 							URL:   "https://example.com",
 						},
+						{
+							Name:  "read_only",
+							Value: true,
+						},
 					},
 				},
 			},

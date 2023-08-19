@@ -19,6 +19,6 @@ type Notify struct {
 
 type NotifyField struct {
 	Name  string `json:"name"`
-	Value string `json:"value"`
+	Value any    `json:"value"`
 	URL   string `json:"url"`
 }

@@ -18,7 +18,7 @@ type Notify struct {
 }
 
 type NotifyField struct {
-	Name  string      `json:"name"`
-	Value interface{} `json:"value"`
-	URL   string      `json:"url"`
+	Name  string `json:"name"`
+	Value any    `json:"value"`
+	URL   string `json:"url"`
 }

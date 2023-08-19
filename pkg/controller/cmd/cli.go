@@ -168,14 +168,16 @@ func Run(argv []string) error {
 				Usage:       "Log level [debug|info|warn|error]",
 				EnvVars:     []string{"GHNOTIFY_LOG_LEVEL"},
 				Destination: &logLevel,
+				Value:       &logLevel,
 			},
 			&cli.GenericFlag{
 				Name:        "log-format",
 				Category:    "logging",
 				Aliases:     []string{"f"},
-				Usage:       "Log format [text|json]",
+				Usage:       "Log format [console|json]",
 				EnvVars:     []string{"GHNOTIFY_LOG_FORMAT"},
 				Destination: &logFormat,
+				Value:       &logFormat,
 			},
 			&cli.GenericFlag{
 				Name:        "log-output",
@@ -184,6 +186,7 @@ func Run(argv []string) error {
 				Usage:       "Log output [stdout|stderr]",
 				EnvVars:     []string{"GHNOTIFY_LOG_OUTPUT"},
 				Destination: &logOutput,
+				Value:       &logOutput,
 			},
 		},
 		Commands: []*cli.Command{

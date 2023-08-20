@@ -4,20 +4,32 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var httpStatusCounterVec = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "ghnotify_http_status_total",
-		Help: "Total number of HTTP responses, by status code.",
-	},
-	[]string{"code"},
+var (
+	httpStatusCounterVec = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ghnotify_http_status_total",
+			Help: "Total number of HTTP responses, by status code.",
+		},
+		[]string{"code"},
+	)
+	httpResponseDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "ghnotify_http_response_duration_seconds",
+			Help:    "Histogram of http response durations by status code.",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"code"},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(httpStatusCounterVec)
+	prometheus.MustRegister(httpResponseDuration)
 }
 
 func MetricsMiddleware(next http.Handler) http.Handler {
@@ -27,8 +39,10 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		startTime := time.Now()
 		recorder := httptest.NewRecorder()
 		next.ServeHTTP(recorder, r)
+		duration := time.Since(startTime).Seconds()
 
 		for k, v := range recorder.HeaderMap {
 			w.Header()[k] = v
@@ -38,5 +52,6 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 
 		httpStatus := strconv.Itoa(recorder.Code)
 		httpStatusCounterVec.WithLabelValues(httpStatus).Inc()
+		httpResponseDuration.WithLabelValues(httpStatus).Observe(duration)
 	})
 }

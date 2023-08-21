@@ -12,6 +12,8 @@ import (
 )
 
 func TestMetricsMiddleware(t *testing.T) {
+	utils.ResetMetrics()
+
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))

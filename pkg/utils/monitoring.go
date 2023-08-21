@@ -10,6 +10,13 @@ import (
 )
 
 var (
+	httpRequestCounterVec = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ghnotify_http_request_total",
+			Help: "Total number of HTTP requests.",
+		},
+		[]string{"method"},
+	)
 	httpStatusCounterVec = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "ghnotify_http_status_total",
@@ -28,6 +35,7 @@ var (
 )
 
 func init() {
+	prometheus.MustRegister(httpRequestCounterVec)
 	prometheus.MustRegister(httpStatusCounterVec)
 	prometheus.MustRegister(httpResponseDuration)
 }
@@ -56,6 +64,7 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 		w.Write(recorder.Body.Bytes())
 
 		httpStatus := strconv.Itoa(recorder.Code)
+		httpRequestCounterVec.WithLabelValues(r.Method).Inc()
 		httpStatusCounterVec.WithLabelValues(httpStatus).Inc()
 		httpResponseDuration.WithLabelValues(httpStatus).Observe(duration)
 	})

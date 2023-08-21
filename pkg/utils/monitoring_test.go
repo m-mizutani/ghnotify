@@ -55,3 +55,45 @@ func TestMetricsMiddleware(t *testing.T) {
 		assert.Equal(t, 1, count)
 	})
 }
+
+func TestNumberOfRequests(t *testing.T) {
+	utils.ResetMetrics()
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	metricsHandler := utils.MetricsMiddleware(handler)
+
+	methods := []string{http.MethodGet, http.MethodPost, http.MethodPut}
+	for _, method := range methods {
+		t.Run("method "+method, func(t *testing.T) {
+			req, err := http.NewRequest(method, "/test", nil)
+			assert.NoError(t, err)
+
+			recorder := httptest.NewRecorder()
+			metricsHandler.ServeHTTP(recorder, req)
+			assert.Equal(t, http.StatusOK, recorder.Code)
+
+			metricFamilies, err := prometheus.DefaultGatherer.Gather()
+			assert.NoError(t, err)
+
+			var found bool
+			for _, mf := range metricFamilies {
+				if *mf.Name == "ghnotify_http_request_total" {
+					for _, m := range mf.Metric {
+						for _, l := range m.Label {
+							if l.GetName() == "method" && l.GetValue() == method {
+								assert.Equal(t, float64(1), *m.Counter.Value)
+								found = true
+								break
+							}
+						}
+					}
+				}
+			}
+			assert.True(t, found, "Did not find counter for method %s", method)
+		})
+	}
+}

@@ -46,7 +46,7 @@ Start by duplicating `.env.template` to `.env` to store the sensitive values gen
 `ghnotify` authenticates the webhook event payload POSTed to it using HMAC-sha256 hash method, consistent with GitHub's procedure.
 Thus for this quickstart, when POSTing the event payload, you must also send the hased value.
 
-You can achive the step explained below by using Postman collection [GitHub Webhook Events](https://web.postman.co/workspace/201d9100-8e44-4ea1-8028-db63b9593ad1/collection/27582439-e25dc84e-e2a3-4a8d-bf6b-d1ed02e91a46 )
+You can achive the step explained below by using Postman collection [GitHub Webhook Events](https://www.postman.com/rindrics/workspace/rindrics/example/27582439-ccffbfcd-2c40-4a46-b16b-1cfd3afb1301 )
 
 #### JSON Event Payload
 

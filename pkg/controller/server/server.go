@@ -15,6 +15,7 @@ import (
 	"github.com/m-mizutani/ghnotify/pkg/usecase"
 	"github.com/m-mizutani/ghnotify/pkg/utils"
 	"github.com/m-mizutani/goerr"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/exp/slog"
 )
 
@@ -30,9 +31,11 @@ func New(uc *usecase.Usecase) *Server {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Post("/webhook/github", serveGitHubWebhook(uc))
+	r.Post("/webhook/github", utils.MetricsMiddleware(serveGitHubWebhook(uc)).ServeHTTP)
 
 	r.Get("/health", handleHealthCheckRequest())
+
+	r.Get("/metrics", utils.MetricsMiddleware(promhttp.Handler()).ServeHTTP)
 
 	return &Server{
 		uc:  uc,

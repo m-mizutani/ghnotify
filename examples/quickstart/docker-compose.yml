@@ -1,0 +1,50 @@
+version: '3'
+services:
+  ghnotify:
+    image: ghcr.io/m-mizutani/ghnotify:v0.1.4
+    command:
+      - --remote-url
+      - http://opa_server:8181/v1/data/github/notify
+      - serve
+    env_file:
+      - .env
+    environment:
+      - GHNOTIFY_ADDR=0.0.0.0:80
+      - GHNOTIFY_LOG_LEVEL=debug
+    ports:
+      - 4080:80
+    networks:
+      - my_network
+
+  opa_server:
+    image: openpolicyagent/opa:latest
+    command:
+      - run
+      - --server
+      - --addr
+      - :8181
+      - --config-file
+      - /config/opa-config.yml
+      - --log-level
+      - debug
+    environment:
+      - POLICY_SERVER_URL=http://policy_server:80
+    ports:
+      - 8181:8181
+    networks:
+      - my_network
+    volumes:
+      - ./opa-config.yml:/config/opa-config.yml
+
+  policy_server:
+    image: nginx:stable-alpine
+    volumes:
+      - ./bundle.tar.gz:/app/policies/bundle.tar.gz
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 5080:80
+    networks:
+      - my_network
+
+networks:
+  my_network:

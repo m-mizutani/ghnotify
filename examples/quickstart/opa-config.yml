@@ -1,0 +1,10 @@
+services:
+  - name: policy_server
+    url: ${POLICY_SERVER_URL}
+bundles:
+  example:
+    service: policy_server
+    resource: /policies/bundle.tar.gz
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 20
